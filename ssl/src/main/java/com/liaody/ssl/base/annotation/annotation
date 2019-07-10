@@ -1,0 +1,66 @@
+1.Retention元注解:其三种取值：RetentionPolicy.SOURCE、RetentionPolicy.CLASS、RetentionPolicy.RUNTIME分别对应：Java源文件(.java文件)---->.class文件---->内存中的字节码。
+可以理解为注解的生命周期。
+
+2.@Target元注解：表示一个注解可以标在哪里
+ElementType.TYPE : 标明该注解可以用于类、接口（包括注解类型）或enum声明
+ElementType.FIELD: 标明该注解可以用于字段(域)声明，包括enum实例
+ElementType.METHOD: 标明该注解可以用于方法声明
+ElementType.PARAMETER: 标明该注解可以用于参数声明
+ElementType.CONSTRUCTOR: 标明注解可以用于构造函数声明
+ElementType.LOCAL_VARIABLE: 标明注解可以用于局部变量声明
+ElementType.PACKAGE: 标明注解可以用于包声明
+ElementType.TYPE_PARAMETER: 标明注解可以用于类型参数声明（1.8新加入）
+ElementType.TYPE_USE: 标明类型使用声明（1.8新加入)
+可以 一个，@Target(ElementType.METHOD ) 也可以多个@Target({ElementType.METHOD , ElementType.TYPE})
+
+3.@Documented
+顾名思义，这个元注解肯定是和文档有关。它的作用是能够将注解中的元素包含到 Javadoc 中去。
+
+4.@Inherited
+  Inherited 是继承的意思，但是它并不是说注解本身可以继承（重点），而是说如果一个超类被 @Inherited 注解过的注解进行注解的话，
+  那么如果它的子类没有被任何注解应用的话，那么这个子类就继承了超类的注解。
+
+5.@Repeatable
+Repeatable 自然是可重复的意思。@Repeatable 是 Java 1.8 才加进来的，所以算是一个新的特性。
+什么样的注解会多次应用呢？通常是注解的值可以同时取多个。
+
+6.注解的提取：反射。
+通过class对象的isAnnotationPresent判断它是否有注解，
+然后通过getAnnotation方法来获取Annotation对象，
+如果获取到的 Annotation 如果不为 null，则就可以调用它们的属性方法了
+
+Annotation面试
+1.什么是注解，它的作用是什么
+通俗的说注解就是一个标签，它被贴在某个地方，告诉我们被他贴的类、属性、方法等有什么特性
+
+注释是绑定到程序源代码元素的元数据，对它们运行的​​代码的操作没有影响。
+他们的典型用例是：
+编译器的信息 - 使用注释，编译器可以检测错误或抑制警告（比如@Override、@Deprecated、@SuppressWarnings、@FunctionalInterface）对应的Retention（RetentionPolicy=Runtime）
+编译时和部署时处理 - 软件工具可以处理注释并生成代码，配置文件等。
+运行时处理 - 可以在运行时检查注释以自定义程序的行为(String 框架的@NonNull注解，自定义验证框架注解)
+
+当开发者使用了Annotation 修饰了类、方法、Field 等成员之后，这些 Annotation 不会自己生效，必须由开发者提供相应的代码来提取并处理 Annotation 信息。
+这些处理提取和处理 Annotation 的代码统称为 APT（Annotation Processing Tool)。
+现在，我们可以给自己答案了，注解有什么用？给谁用？给 编译器或者APT用的。
+
+注解的提取需要借助于 Java 的反射技术，反射比较慢，所以注解使用时也需要谨慎计较时间成本。
+
+2.从标准库中描述一些有用的注释。
+java.lang和java.lang.annotation包中有几个注释，更常见的包括但不限于：
+@Override -标记方法是否覆盖超类中声明的元素。如果它无法正确覆盖该方法，编译器将发出错误
+@Deprecated - 表示该元素已弃用且不应使用。如果程序使用标有此批注的方法，类或字段，编译器将发出警告
+@SuppressWarnings - 告诉编译器禁止特定警告。在与泛型出现之前编写的遗留代码接口时最常用的
+@FunctionalInterface - 在Java 8中引入，表明类型声明是一个功能接口，可以使用Lambda Expression提供其实现
+@SafeVarargs-参数安全类型注解。它的目的是提醒开发者不要用参数做一些不安全的操作,它的存在会阻止编译器产生 unchecked 这样的警告。
+
+3.可以从注释方法声明返回哪些对象类型？
+返回类型必须是基本类型，String，Class，Enum或以前类型之一的数组。否则，编译器将抛出错误。注意，不能返回Object类型，无法通过编译
+
+4.哪些程序元素可以注释？
+类、构造器、属性、方法都可以，在@Target种使用一个数组表示 ElementType
+
+5.什么是元注释？
+是否适用于其他注释的注释。如果一个注解被其他注解引用他就是一个元注释
+
+6.是否可以扩展注释？
+注释。注释总是扩展java.lang.annotation.Annotation，如Java语言规范中所述

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.liaody.ssl.dao.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.liaody.ssl.entity.User">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="age" jdbcType="INTEGER" property="age"/>
+        <result column="email" jdbcType="VARCHAR" property="email"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        `name`,age,email
+    </sql>
+
+    <sql id="Full_Base_Column_List">
+       id,`name`,age,email
+    </sql>
+
+    <!-- 更新片段 -->
+    <sql id="Update_Base_Column_List">
+       <!-- 动态判断并去掉多余的逗号 -->
+        <trim suffixOverrides=",">
+           <if test="name!=null and name!=''">
+               `name`=#{name},
+           </if>
+           <if test="age!=null and age!=0">
+               `age`=#{age},
+           </if>
+           <if test="email!=null and email!=''">
+               `email`=#{email}
+           </if>
+       </trim>
+    </sql>
+
+    <select id="selectUser" parameterType="int" resultType="com.liaody.ssl.entity.User">
+        SELECT
+        <include refid="Full_Base_Column_List"/>
+        FROM `USER` WHERE ID = #{id}
+    </select>
+
+    <select id="selectAllUsers" parameterType="int" resultType="com.liaody.ssl.entity.User">
+        SELECT
+        <include refid="Full_Base_Column_List"/>
+        FROM `USER`
+    </select>
+
+    <!-- 单实体插入 -->
+    <insert id="insert" parameterType="com.liaody.ssl.entity.User">
+        INSERT INTO `USER` (
+        <include refid="Base_Column_List"/>
+        ) values (#{name},#{age},#{email})
+    </insert>
+
+    <!-- 批量插入或更新-->
+    <!-- 引用其它mapper.xml的sql片段:<include refid="namespace.sql片段"/>-->
+    <insert id="batchInsert" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" separator=";" >
+            INSERT INTO `USER` (
+            <include refid="Base_Column_List"/>
+            ) values
+            (#{item.name},#{item.age},#{item.email})
+            ON DUPLICATE KEY UPDATE
+            <trim suffixOverrides=",">
+                <if test="item.name!=null and item.name!=''">
+                    `name`=#{item.name},
+                </if>
+                <if test="item.age!=null and item.age!=0">
+                    `age`=#{item.age},
+                </if>
+                <if test="item.email!=null and item.email!=''">
+                    `email`=#{item.email}
+                </if>
+            </trim>
+        </foreach>
+    </insert>
+
+    <!-- 插入或者更新 -->
+    <insert id="insertOrUpdate" parameterType="java.util.Collection">
+        INSERT INTO `USER` (
+        <include refid="Base_Column_List"/>
+        ) VALUES (#{name},#{age},#{email})
+        ON DUPLICATE KEY UPDATE
+        <include refid="Update_Base_Column_List" />
+    </insert>
+
+
+</mapper>

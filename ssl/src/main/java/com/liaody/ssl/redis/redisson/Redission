@@ -1,0 +1,41 @@
+1.集群模式、云托管模式、单Redis节点模式、哨兵模式、主从模式
+2.Redisson的对象编码类是用于将对象进行序列化和反序列化，以实现对该对象在Redis里的读取和存储。Redisson提供了以下几种的对象编码应用，
+3.程序接口调用
+Redisson为每个操作都提供了自动重试策略，当某个命令执行失败时，Redisson会自动进行重试。自动重试策略可以通过修改retryAttempts（默认值：3）
+参数和retryInterval（默认值：1000毫秒）参数来进行优化调整。当等待时间达到retryInterval指定的时间间隔以后，将自动重试下一次。全部重试失败以后将抛出错误。
+
+Redisson框架提供的几乎所有对象都包含了同步和异步相互匹配的方法。这些对象都可以通过RedissonClient接口获取。
+同时还为大部分Redisson对象提供了满足异步流处理标准的程序接口RedissonReactiveClient。除此外还提供了RxJava2规范的RedissonRxClient程序接口。
+
+4.整长型累加器（LongAdder）
+  基于Redis的Redisson分布式整长型累加器（LongAdder）采用了与java.util.concurrent.atomic.LongAdder类似的接口。
+  通过利用客户端内置的LongAdder对象，为分布式环境下递增和递减操作提供了很高得性能。
+  据统计其性能最高比分布式AtomicLong对象快 12000 倍。完美适用于分布式统计计量场景。
+
+  RLongAdder atomicLong = redisson.getLongAdder("myLongAdder");
+  atomicLong.add(12);
+  atomicLong.increment();
+  atomicLong.decrement();
+  atomicLong.sum();
+  当不再使用整长型累加器对象的时候应该自行手动销毁，如果Redisson对象被关闭（shutdown）了，则不用手动销毁。
+
+  RLongAdder atomicLong = ...
+  atomicLong.destroy();
+
+5.布隆过滤器
+
+6.缓存雪崩
+将系统中key的缓存失效时间均匀地错开，防止统一时间点有大量的key对应的缓存失效；
+重新设计缓存的使用方式，当我们通过key去查询数据时，首先查询缓存，如果此时缓存中查询不到，就通过分布式锁进行加锁，
+取得锁的进程查DB并设置缓存，然后解锁；其他进程如果发现有锁就等待，然后等解锁后返回缓存数据或者再次查询DB。
+
+7.热点key
+热点key：
+描述
+缓存中的某些Key(可能对应用与某个促销商品)对应的value存储在集群中一台机器，使得所有流量涌向同一机器，
+成为系统的瓶颈，该问题的挑战在于它无法通过增加机器容量来解决。
+解决方案：
+客户端热点key缓存：将热点key对应value并缓存在客户端本地（比如说leveldb或者berbly、h2等），并且设置一个失效时间。
+对于每次读请求，将首先检查key是否存在于本地缓存中，如果存在则直接返回，如果不存在再去访问分布式缓存的机器。
+将热点key分散为多个子key，然后存储到缓存集群的不同机器上，这些子key对应的value都和热点key是一样的。
+当通过热点key去查询数据时，通过某种hash算法随机选择一个子key，然后再去访问缓存机器，将热点分散到了多个子key上。
