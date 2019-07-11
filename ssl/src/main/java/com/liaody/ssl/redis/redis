@@ -213,6 +213,15 @@ psubscribe、 unsubscribe、 punsubscribe的四个命令。
 18.绕不开的Redis持久化
 RDB快照方式或者AOF文件追加方式
 
+fork()函数用于从一个已经存在的进程内创建一个新的进程，新的进程称为“子进程”，相应地称创建子进程的进程为“父进程”。
+使用fork()函数得到的子进程是父进程的复制品，子进程完全复制了父进程的资源，包括进程上下文、代码区、数据区、堆区、栈区、
+内存信息、打开文件的文件描述符、信号处理函数、进程优先级、进程组号、当前工作目录、根目录、
+资源限制和控制终端等信息，而子进程与父进程的区别有进程号、资源使用情况和计时器等。
+区分父子进程常见的方法为查看fork()函数的返回值或区分父子进程的PID。
+
+
+
+
 RDB：
 触发RDB持久化的方式分为手动和被动的方式。
 手动触发:save和bgsave命令：
@@ -554,6 +563,129 @@ Redis集群时需要根据业务数据规模和消息通信成本做出合理规
 请求倾斜：集群内特定节点请求量/流量过大将导致节点之间负载不均， 影响集群均衡和运维成本。
 
 slave-read-only在集群模式下无效（该配置是在主从上的），使用readonly命令打开只读
+
+
+
+Redis客户端api
+1.client list
+输入缓冲区： qbuf、 qbuf-free。client list中qbuf和qbuf-free分别代表这个缓冲区的总容量和剩余容量
+一旦某个客户端的输入缓冲区超过1G， 客户端将会被关闭。
+·输入缓冲区不受maxmemory控制， 假设一个Redis实例设置了maxmemory为4G， 已经存储了2G数据， 但是如果此时输入缓冲区使用了
+3G， 已经超过maxmemory限制， 可能会产生数据丢失、 键值淘汰、 OOM等。
+情况（如图4-6所示） 。
+
+输入缓冲区过大主要是因为Redis的处理速度跟不上输入缓冲区的输入速度， 并且每次进入输入缓冲区的命令包含了大量
+bigkey， 从而造成了输入缓冲区过大的情况。 还有一种情况就是Redis发生了阻塞， 短期内不能处理命令， 造成客户端输入的命令积压在了输入缓冲区，
+造成了输入缓冲区过大。
+
+监控输入缓冲：通过定期执行 client list手机qbuf和qbuf-free找到异常得连接记录进行分析。通过info命令的info clients模块， 找到最大的输入缓冲区， 例如下面命
+令中的其中client_biggest_input_buf代表最大的输入缓冲区， 
+
+2.info clients 
+
+3.输出缓冲区：obl、oll、omem
+client list中的obl代表固定缓冲区的长度， oll代表动态缓冲区列表的长
+度， omem代表使用的字节数。
+
+输出缓冲区的容量可以通过参数client-outputbuffer-limit来进行设置， 并且输出缓冲区做得更加细致， 按照客户端的不同
+分为三种： 普通客户端、 发布订阅客户端、 slave客户端
+设置输出
+client-output-buffer-limit normal/slave/pubsub <hard limit> <soft limit> <soft seconds>
+<hard limit>： 如果客户端使用的输出缓冲区大于<hard limit>， 客户端会被立即关闭。
+·<soft limit>和<soft seconds>： 如果客户端使用的输出缓冲区超过了<soft limit>并且持续了<soft limit>秒， 客户端会被立即关闭。
+
+Redis 默认配置
+client-output-buffer-limit normal 0 0 0
+client-output-buffer-limit slave 256mb 64mb 60
+client-output-buffer-limit pubsub 32mb 8mb 60
+
+和输入缓冲区相同的是， 输出缓冲区也不会受到maxmemory的限制， 如果使用不当同样会造成maxmemory用满产生的数据丢失、 键值淘汰、 OOM等
+情况。
+实际上输出缓冲区由两部分组成： 固定缓冲区（16KB） 和动态缓冲区， 其中固定缓冲区返回比较小的执行结果， 而动态缓冲区返回比较大的结
+果
+
+
+监控输出缓冲区的方法依然有两种：
+·通过定期执行client list命令， 收集obl、 oll、 omem找到异常的连接记录并分析， 最终找到可能出问题的客户端。
+·通过info命令的info clients模块， 找到输出缓冲区列表最大对象数
+
+
+客户端的存活状态
+client list中的age和idle分别代表当前客户端已经连接的时间和最近一次的空闲时间
+
+客户端的限制：客户端的限制maxclients和timeout
+maxclients默认值是10000
+Redis默认的timeout是0， 也就是不会检测客户端的空闲。可以设置为300秒
+
+Redis的默认配置给出的timeout=0， 在这种情况下客户端基本不会出现
+上面的异常， 这是基于对客户端开发的一种保护。 例如很多开发人员在使用
+JedisPool时不会对连接池对象做空闲检测和验证， 如果设置了timeout>0， 可
+能就会出现上面的异常， 对应用业务造成一定影响， 但是如果Redis的客户
+端使用不当或者客户端本身的一些问题， 造成没有及时释放客户端连接， 可
+能会造成大量的idle连接占据着很多连接资源， 一旦超过maxclients； 后果也
+是不堪设想。 所在在实际开发和运维中， 需要将timeout设置成大于0， 例如
+可以设置为300秒， 同时在客户端使用上添加空闲检测和验证等等措施， 例
+如JedisPool使用common-pool提供的三个属性： minEvictableIdleTimeMillis、
+testWhileIdle、 timeBetweenEvictionRunsMillis
+
+client list中的flag是用于标识当前客户端的类型， 例如flag=S代表当前客
+户端是slave客户端、 flag=N代表当前是普通客户端， flag=O代表当前客户端
+正在执行monitor命令
+
+手动杀掉客户端:client kill 127.0.0.1:52236
+暂停客户端：client pause timeout(毫秒)
+
+monitor监控正在执行的Redis命令
+monitor的作用很明显， 如果开发和运维人员想监听Redis正在执行的命
+297令， 就可以用monitor命令， 但事实并非如此美好， 每个客户端都有自己的
+输出缓冲区， 既然monitor能监听到所有的命令， 一旦Redis的并发量过大，
+monitor客户端的输出缓冲会暴涨， 可能瞬间会占用大量内存。谨慎使用
+
+统计客户端指标
+info stats
+rejected_connections： Redis自启动以来拒绝的客户端连接数， 需要重点监控
+
+客户端常见异常
+1.JedisPool中的Jedis对象个数是有限的， 默认是8个。 这里假设使用的默
+认配置， 如果有8个Jedis对象被占用， 并且没有归还， 此时调用者还要从
+JedisPool中借用Jedis， 就需要进行等待（例如设置了maxWaitMillis>0） ， 如
+果在maxWaitMillis时间内仍然无法获取到Jedis对象就会抛出如下异常
+redis.clients.jedis.exceptions.JedisConnectionException: Could not get a resource
+from the pool
+…
+Caused by: java.util.NoSuchElementException: Timeout waiting for idle object
+at org.apache.commons.pool2.impl.GenericObjectPool.borrowObject(GenericObjectPool.
+java:449)
+
+如果没有归还JedisPool，那么很可能其他的开发客户端就会连接不上
+for (int i = 0; i < 8; i++) {
+Jedis jedis = null;
+try {
+jedis = jedisPool.getResource();
+jedis.ping();
+} catch (Exception e) {
+e.printStackTrace();
+}
+}
+
+fork子进程
+读时共享
+刚fork出来之后，两个地址空间用户区数据完全相同，父子进程都指向同一块共享区域，父子进程中都映射到共享区域中的变量（int num）
+写时拷贝
+当后续父子进程对共享区域中的变量进行不同的操作时(父进程对num++，子进程对num–)，
+—>发生写时拷贝原则，父子进程各自拷贝出来int大小的空间存放自己的num，因此父子进程中的num是相互独立，
+互不影响的====>因此父子进程之间不能够使用全局变量进行通信。
+
+
+
+
+
+
+
+
+
+
+
 
 
 
