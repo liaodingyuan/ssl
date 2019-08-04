@@ -1,9 +1,11 @@
-package com.liaody.ssl.zookeeper
+package com.liaody.ssl.zookeeper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.KeeperException;
 
 import java.util.List;
+
+import static com.liaody.ssl.constants.SslConstants.ZK_ROOT_PATH;
 
 @Slf4j
 public class DeleteGroup extends ConnectionWatcher {
@@ -14,7 +16,7 @@ public class DeleteGroup extends ConnectionWatcher {
      */
     public void delete(String groupName){
 
-        String path = "/" + groupName;
+        String path = ZK_ROOT_PATH + "/" + groupName;
         // 获取节点下的所有子节点
         List<String> children = null;
         try {

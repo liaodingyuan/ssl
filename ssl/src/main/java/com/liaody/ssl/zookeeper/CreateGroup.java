@@ -2,10 +2,11 @@ package com.liaody.ssl.zookeeper;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zookeeper.*;
-import org.springframework.context.annotation.Scope;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
+
+import static com.liaody.ssl.constants.SslConstants.ZK_ROOT_PATH;
 
 /**
  * 创建zoo节点
@@ -13,6 +14,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @Slf4j
 public class CreateGroup implements Watcher {
+
     /**
      * 设置会话超时
      */
@@ -65,7 +67,7 @@ public class CreateGroup implements Watcher {
     /**
      * 创建zk对象、当客户端连接上zookeeper时会执行procces里的countDownLatch.countDown
      * ，计数器会变为0，则await方法返回
-     * @param hosts
+     * @param hosts 主机列表
      * @throws IOException
      * @throws InterruptedException
      */
@@ -75,15 +77,23 @@ public class CreateGroup implements Watcher {
         countDownLatch.await();
     }
 
-    public void createGroup(String groupName) throws KeeperException, InterruptedException {
-        String path = "/"+groupName;
+    /**
+     * 创建节点
+     * @param groupName 节点名称
+     * @return
+     * @throws KeeperException
+     * @throws InterruptedException
+     */
+    public String createGroup(String groupName) throws KeeperException, InterruptedException {
+        String path = ZK_ROOT_PATH +"/"+groupName;
         log.info("path->{}",path);
-        String creatPath = zk.create(path,null,
+        String createPath = zk.create(path,null,
                 // 允许任何客户端对该node进行读写
                 ZooDefs.Ids.OPEN_ACL_UNSAFE,
                 // 持久化的node。get node 时，ephemeralOwner值不再是0，表示这个临时节点的版本号，如果是永久节点则其值为 0x0
                 CreateMode.PERSISTENT_SEQUENTIAL);
       log.info("创建group完成");
+      return createPath;
     }
 
     /**
@@ -98,7 +108,6 @@ public class CreateGroup implements Watcher {
             }finally {
                 zk = null;
                 System.gc();
-
             }
         }
     }

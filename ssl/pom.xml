@@ -187,6 +187,14 @@
             <artifactId>netty-transport-native-epoll</artifactId>
             <version>4.1.30.Final</version>
         </dependency>
+
+        <!-- zk客户端 -->
+        <!-- https://mvnrepository.com/artifact/com.101tec/zkclient -->
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>0.11</version>
+        </dependency>
     </dependencies>
 
     <build>
