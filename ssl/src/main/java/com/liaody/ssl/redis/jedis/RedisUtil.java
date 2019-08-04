@@ -29,7 +29,6 @@ public class RedisUtil {
      * @param indexdb 选择redis库 0-15
      * @return 成功返回value 失败返回null
      */
-
     public String get(String key, int indexdb) {
         Jedis jedis = null;
         String value = null;

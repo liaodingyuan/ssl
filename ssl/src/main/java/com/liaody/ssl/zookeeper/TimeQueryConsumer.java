@@ -27,7 +27,7 @@ public class TimeQueryConsumer {
     private ZooKeeper zooKeeper;
     private static final Integer SESSION_TIMEOUT = 2000;
   //  private CountDownLatch countDownLatch = new CountDownLatch(1);
-    private static final String PARENT_NODE = "/servers";
+    private static final String PARENT_NODE = "/app";
 
     @PostConstruct
     public void init() {

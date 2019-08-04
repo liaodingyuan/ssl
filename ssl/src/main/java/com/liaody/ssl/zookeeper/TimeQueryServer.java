@@ -17,7 +17,7 @@ public class TimeQueryServer {
     private ZooKeeper zooKeeper;
     private static final Integer SESSION_TIMEOUT = 2000;
     private CountDownLatch countDownLatch = new CountDownLatch(1);
-    private static final String PARENT_NODE = "/servers";
+    private static final String PARENT_NODE = "/app";
 
     @PostConstruct
     public void init() {
@@ -52,10 +52,10 @@ public class TimeQueryServer {
     public void registerServer(String host,String port) throws KeeperException, InterruptedException {
 
         // 首先判断父节点是否存在，不存在的话先创建父节点
-        Stat stat = zooKeeper.exists("/servers", false);
+        Stat stat = zooKeeper.exists("/app", false);
         // 如果父节点为空，则创建永久型父节点
         if(stat==null){
-            zooKeeper.create("/servers","server".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
+            zooKeeper.create("/app","server".getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.PERSISTENT);
         }
         // 注册服务数据到zk的约定的节点下（临时节点，服务掉线之后会删除这一个临时节点，从而得知服务下线）
         String create = zooKeeper.create(PARENT_NODE+"/server",(host+":"+port).getBytes(), ZooDefs.Ids.OPEN_ACL_UNSAFE,CreateMode.EPHEMERAL_SEQUENTIAL);

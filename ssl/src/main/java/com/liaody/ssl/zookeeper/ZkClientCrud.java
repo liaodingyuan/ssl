@@ -18,7 +18,7 @@ import static com.liaody.ssl.constants.SslConstants.ZK_ROOT_PATH;
  *
  * @author yuanhaha
  */
-@Component
+//@Component
 @Slf4j
 public class ZkClientCrud<T> {
 
@@ -31,7 +31,7 @@ public class ZkClientCrud<T> {
     /**
      * 初始化
      */
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         // 别忘了定义序列化方式
         zkClient = new ZkClient(SslConstants.ZK_CONNECT_SERVER_LIST, 5000, 5000, new MyZkSerializer());
