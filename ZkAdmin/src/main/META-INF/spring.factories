@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+yuanhaha.zk.admin.enableautoconfiguration.HelloAutoConfiguration
+
+org.springframework.boot.SpringApplicationRunListener=\
+yuanhaha.zk.admin.enableautoconfiguration.DemoSpringBootApplicationRunListener
