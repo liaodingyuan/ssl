@@ -43,6 +43,7 @@ public class RedissonConfig {
                 // 设置负载均衡算法
                 .setLoadBalancer(new RoundRobinLoadBalancer());
         return Redisson.create(config);
+        //return null;
     }
     @Bean
     public ObjectMapper objectMapper() {

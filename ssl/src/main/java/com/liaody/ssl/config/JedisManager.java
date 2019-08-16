@@ -7,17 +7,6 @@ import redis.clients.jedis.*;
 
 @Slf4j
 public class JedisManager {
-
-//    @Value("${spring.redis.host}")
-//    private static String host;
-//    @Value("${spring.redis.port}")
-//    private static String port;
-//    @Value("${spring.redis.jedis.pool.maxActive}")
-//    private static String maxActive;
-//    @Value("${spring.redis.jedis.pool.maxWait}")
-//    private static String maxWait;
-//    @Value("${spring.redis.jedis.pool.maxIdle}")
-
     /**
      * Redis 池
      */

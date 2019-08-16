@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 public class RedisController {
 
-    @Autowired
+    @Autowired(required = false)
     public RedissonClient redissonClient;
 
     @GetMapping("/get-key")
