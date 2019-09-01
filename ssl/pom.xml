@@ -52,6 +52,7 @@
             <version>2.5.0</version>
         </dependency>
 
+        <!-- 当使用@SourceProty的时候会用到-->
         <!--<dependency>-->
         <!--<groupId>org.springframework.boot</groupId>-->
         <!--<artifactId>spring-boot-configuration-processor</artifactId>-->
@@ -63,10 +64,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
-        <!--配置数据源、mybatis-->
+        <!-- 自动配置使用logback作为日志框架-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+        <!--配置数据源、mybatis-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>Tomcat
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

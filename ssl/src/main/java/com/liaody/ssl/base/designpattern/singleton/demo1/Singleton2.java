@@ -1,4 +1,4 @@
-package com.liaody.ssl.base.designpattern.singleton;
+package com.liaody.ssl.base.designpattern.singleton.demo1;
 
 public class Singleton2 {
     private static Singleton2 singleton2;

@@ -20,13 +20,13 @@ import java.io.IOException;
 /**
  * Redisson客户端
  */
-@Configuration
+//@Configuration
 public class RedissonConfig {
     /**
      * 主从模式
      * @return RedissonClient
      */
-    @Bean("redissonClient")
+  //  @Bean("redissonClient")
     public RedissonClient masterSlaveMode(){
         Config config = new Config();
         config
@@ -45,7 +45,7 @@ public class RedissonConfig {
         return Redisson.create(config);
         //return null;
     }
-    @Bean
+    //@Bean
     public ObjectMapper objectMapper() {
         return new ObjectMapper().disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
     }

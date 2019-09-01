@@ -1,4 +1,4 @@
-package com.liaody.ssl.base.designpattern.factory;
+package com.liaody.ssl.base.designpattern.factory.demo1;
 
 public class MyFactory {
 

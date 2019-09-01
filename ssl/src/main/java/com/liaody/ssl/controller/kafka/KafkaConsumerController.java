@@ -1,6 +1,5 @@
 package com.liaody.ssl.controller.kafka;
 
-import org.apache.juli.logging.LogFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -1,4 +1,4 @@
-package com.liaody.ssl.base.designpattern.singleton;
+package com.liaody.ssl.base.designpattern.singleton.demo1;
 
 /**
  * 单例模式
